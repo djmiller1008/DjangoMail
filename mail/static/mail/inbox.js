@@ -6,6 +6,9 @@ document.addEventListener('DOMContentLoaded', function() {
   document.querySelector('#archived').addEventListener('click', () => load_mailbox('archive'));
   document.querySelector('#compose').addEventListener('click', compose_email);
 
+  document.querySelector('#compose-form').addEventListener('submit', event => send_email(event));
+
+
   // By default, load the inbox
   load_mailbox('inbox');
 });
@@ -30,4 +33,44 @@ function load_mailbox(mailbox) {
 
   // Show the mailbox name
   document.querySelector('#emails-view').innerHTML = `<h3>${mailbox.charAt(0).toUpperCase() + mailbox.slice(1)}</h3>`;
+
+  if (mailbox === 'sent') {
+    get_sent_emails();
+  }
+}
+
+function send_email(event) {
+  event.preventDefault();
+  const recipients = document.querySelector('#compose-recipients').value
+  const subject = document.querySelector('#compose-subject').value
+  const body = document.querySelector('#compose-body').value
+
+  fetch('/emails', {
+    method: 'POST',
+    body: JSON.stringify({
+      recipients: recipients,
+      subject: subject,
+      body: body 
+    })
+  })
+    .then(response => response.json())
+    .then(result => {
+      const span = document.createElement('span');
+      if (result.message) {
+        span.innerHTML = result.message;
+        span.className = 'success-message';
+        document.querySelector('#messages').append(span);
+        load_mailbox('sent');
+      } else {
+        span.innerHTML = result.error;
+        span.className = 'error-message';
+        document.querySelector('#messages').append(span);
+      }
+    })
+}
+
+function get_sent_emails() {
+  fetch('/emails/sent')
+    .then(response => response.json())
+    .then(result => console.log(result));
 }
