@@ -2,11 +2,11 @@ textarea {
     min-height: 400px;
 }
 
-.error-message {
+#error-message {
     color: red;
 }
 
-.success-message {
+#success-message {
     color: blue;
 }
 
