@@ -15,6 +15,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
 function compose_email() {
 
+  removeSuccessMessage();
+
   // Show compose view and hide other views
   document.querySelector('#emails-view').style.display = 'none';
   
@@ -32,13 +34,32 @@ function load_mailbox(mailbox) {
   document.querySelector('#emails-view').style.display = 'block';
   document.querySelector('#compose-view').style.display = 'none';
 
+    
+
   // Show the mailbox name
   document.querySelector('#emails-view').innerHTML = `<h3>${mailbox.charAt(0).toUpperCase() + mailbox.slice(1)}</h3>`;
+
+  removeErrorMessage();
 
   if (mailbox === 'sent') {
     get_sent_emails();
   } else if (mailbox === 'inbox') {
     get_inbox_emails();
+    removeSuccessMessage();
+  }
+}
+
+function removeErrorMessage() {
+  let error = document.getElementById('error-message');
+  if (error) {
+    error.remove();
+  } 
+}
+
+function removeSuccessMessage() {
+  let success = document.getElementById('success-message');
+  if (success) {
+    success.remove();
   }
 }
 
@@ -61,12 +82,12 @@ function send_email(event) {
       const span = document.createElement('span');
       if (result.message) {
         span.innerHTML = result.message;
-        span.className = 'success-message';
+        span.id = 'success-message';
         document.querySelector('#messages').append(span);
         load_mailbox('sent');
       } else {
         span.innerHTML = result.error;
-        span.className = 'error-message';
+        span.id = 'error-message';
         document.querySelector('#messages').append(span);
       }
     })
