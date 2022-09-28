@@ -17,6 +17,7 @@ function compose_email() {
 
   // Show compose view and hide other views
   document.querySelector('#emails-view').style.display = 'none';
+  
   document.querySelector('#compose-view').style.display = 'block';
 
   // Clear out composition fields
@@ -36,6 +37,8 @@ function load_mailbox(mailbox) {
 
   if (mailbox === 'sent') {
     get_sent_emails();
+  } else if (mailbox === 'inbox') {
+    get_inbox_emails();
   }
 }
 
@@ -70,7 +73,59 @@ function send_email(event) {
 }
 
 function get_sent_emails() {
+  const emailDiv = document.querySelector('#emails-view');
+
   fetch('/emails/sent')
     .then(response => response.json())
-    .then(result => console.log(result));
+    .then(result => {
+      result.forEach(email => {
+        const section = document.createElement('section');
+        section.className = 'email-display-section'
+        const p1 = document.createElement('span');
+        const p2 = document.createElement('span');
+        const p3 = document.createElement('span');
+
+        p1.className = 'email-address';
+        p2.className = 'subject-line';
+        p3.className = 'timestamp';
+  
+        p1.innerHTML = email.recipients;
+        p2.innerHTML = email.subject;
+        p3.innerHTML = email.timestamp;
+        section.appendChild(p1);
+        section.appendChild(p2);
+        section.appendChild(p3);
+  
+        emailDiv.appendChild(section);
+      })
+    });
+}
+
+function get_inbox_emails() {
+  const emailDiv = document.querySelector('#emails-view');
+
+  fetch('/emails/inbox')
+    .then(response => response.json())
+    .then(result => {
+      result.forEach(email => {
+        const section = document.createElement('section');
+        section.className = 'email-display-section'
+        const p1 = document.createElement('span');
+        const p2 = document.createElement('span');
+        const p3 = document.createElement('span');
+
+        p1.className = 'email-address';
+        p2.className = 'subject-line';
+        p3.className = 'timestamp';
+  
+        p1.innerHTML = email.sender;
+        p2.innerHTML = email.subject;
+        p3.innerHTML = email.timestamp;
+        section.appendChild(p1);
+        section.appendChild(p2);
+        section.appendChild(p3);
+  
+        emailDiv.appendChild(section);
+      })
+    })
 }
