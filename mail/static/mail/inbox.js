@@ -47,6 +47,9 @@ function load_mailbox(mailbox) {
   } else if (mailbox === 'inbox') {
     get_inbox_emails();
     removeSuccessMessage();
+  } else if (mailbox === 'archive') {
+    get_archive_emails();
+    removeSuccessMessage();
   }
 }
 
@@ -163,6 +166,43 @@ function get_inbox_emails() {
     })
 }
 
+function get_archive_emails() {
+  const emailDiv = document.querySelector('#emails-view');
+ 
+  fetch('/emails/archive')
+    .then(response => response.json())
+    .then(result => {
+      result.forEach(email => {
+        const section = document.createElement('section');
+
+        if (email.read) {
+          section.className = 'email-display-section read';
+        } else {
+          section.className = 'email-display-section';
+        }
+        
+        const p1 = document.createElement('span');
+        const p2 = document.createElement('span');
+        const p3 = document.createElement('span');
+
+        p1.className = 'email-address';
+        p2.className = 'subject-line';
+        p3.className = 'timestamp';
+  
+        p1.innerHTML = email.sender;
+        p2.innerHTML = email.subject;
+        p3.innerHTML = email.timestamp;
+        section.appendChild(p1);
+        section.appendChild(p2);
+        section.appendChild(p3);
+
+        section.addEventListener('click', () => load_email(email.id, 'archive'))
+  
+        emailDiv.appendChild(section);
+      })
+    })
+}
+
 function markAsRead(id) {
   fetch(`/emails/${id}`, {
     method: 'PUT',
@@ -178,13 +218,23 @@ function archiveEmail(id) {
     body: JSON.stringify({
       archived: true
     })
-  })
+  }).then(() => load_mailbox('inbox'))
+}
+
+function unarchiveEmail(id) {
+  fetch(`/emails/${id}`, {
+    method: 'PUT',
+    body: JSON.stringify({
+      archived: false
+    })
+  }).then(() => load_mailbox('archive'))
 }
 
 function load_email(id, fromMailbox) {
   document.querySelector('#emails-view').style.display = 'none';
   document.querySelector('#compose-view').style.display = 'none';
   document.querySelector('#single-email-view').style.display = 'block';
+  removeSuccessMessage();
 
   fetch(`/emails/${id}`)
     .then(response => response.json())
@@ -252,18 +302,24 @@ function load_email(id, fromMailbox) {
       replyButton.className = 'btn btn-sm btn-outline-primary'
       emailDiv.appendChild(replyButton);
 
-      if (fromMailbox === 'inbox') {
+      if (fromMailbox === 'inbox' || 'archive') {
       
         const archiveButton = document.createElement('button');
 
         if (result.archived) {
           archiveButton.innerHTML = 'Unarchive';
+          archiveButton.addEventListener('click', () => {
+            unarchiveEmail(id);
+        });
+
         } else {
           archiveButton.innerHTML = 'Archive';
+          archiveButton.addEventListener('click', () => {
+            archiveEmail(id);
+          });
         }
         
         archiveButton.className = 'btn btn-sm btn-outline-primary archive';
-        archiveButton.addEventListener('click', () => archiveEmail(id));
         emailDiv.appendChild(archiveButton);
       }
      
