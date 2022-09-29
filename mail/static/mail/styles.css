@@ -25,16 +25,25 @@ textarea {
 
 .email-display-section:hover {
     cursor: pointer;
-    background-color: gainsboro;
+    background-color: darkgrey;
 }
 
 .email-address {
     font-weight: 700;
     margin-right: 3rem;
     margin-left: 1rem;
+    width: 20rem;
 }
 
 .timestamp {
     margin-left: auto;
     opacity: .8;
+}
+
+.read {
+    background-color: gainsboro;
+}
+
+.archive {
+    margin-left: 1rem;
 }
