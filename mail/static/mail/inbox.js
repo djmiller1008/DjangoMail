@@ -14,10 +14,9 @@ document.addEventListener('DOMContentLoaded', function() {
   load_mailbox('inbox');
 });
 
-function compose_email() {
-
+function compose_email(replyInfo) {
+  
   removeSuccessMessage();
-
   // Show compose view and hide other views
   document.querySelector('#emails-view').style.display = 'none';
   document.querySelector('#single-email-view').style.display = 'none';
@@ -27,6 +26,18 @@ function compose_email() {
   document.querySelector('#compose-recipients').value = '';
   document.querySelector('#compose-subject').value = '';
   document.querySelector('#compose-body').value = '';
+
+  if (replyInfo.from !== undefined) {
+    document.querySelector('#compose-recipients').value = replyInfo.from;
+    if (replyInfo.subject.slice(0, 2) === 'Re:') {
+      document.querySelector('#compose-subject').value = replyInfo.subject;
+    } else {
+      document.querySelector('#compose-subject').value = `Re: ${replyInfo.subject}`
+    }
+    document.querySelector('#compose-body').value = `On ${replyInfo.timestamp}, ${replyInfo.from} wrote: ${replyInfo.body}`;
+  }
+
+
 }
 
 function load_mailbox(mailbox) {
@@ -297,10 +308,21 @@ function load_email(id, fromMailbox) {
 
       emailDiv.appendChild(emailInfoDiv);
 
+      const replyInfo = {
+        from: result.sender,
+        to: result.recipients,
+        subject: result.subject,
+        body: result.body,
+        timestamp: result.timestamp
+      }
+
       const replyButton = document.createElement('button');
       replyButton.innerHTML = 'Reply';
       replyButton.className = 'btn btn-sm btn-outline-primary'
+      replyButton.addEventListener('click', () => compose_email(replyInfo))
       emailDiv.appendChild(replyButton);
+
+      
 
       if (fromMailbox === 'inbox' || 'archive') {
       
